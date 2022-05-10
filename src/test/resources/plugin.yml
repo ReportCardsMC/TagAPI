@@ -1,0 +1,6 @@
+main: xyz.reportcards.test.tagapi
+name: TestPlugin
+version: '1.0'
+description: A plugin used to test TagAPI
+author: ReportCards
+depend: [ProtocolLib]
