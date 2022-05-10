@@ -2,10 +2,13 @@ package xyz.reportcards.tagapi;
 
 
 import com.comphenix.protocol.wrappers.EnumWrappers;
+import com.comphenix.protocol.wrappers.PlayerInfoData;
+import com.comphenix.protocol.wrappers.WrappedGameProfile;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import xyz.reportcards.tagapi.wrapper.impl.WrapperPlayServerPlayerInfo;
 
+import java.util.Collections;
 import java.util.UUID;
 
 public class TagPlayer {
@@ -46,8 +49,8 @@ public class TagPlayer {
     public void refresh() {
         WrapperPlayServerPlayerInfo packet = new WrapperPlayServerPlayerInfo();
         packet.setAction(EnumWrappers.PlayerInfoAction.REMOVE_PLAYER);
-        packet.setData(new );
-        
+        packet.setData(Collections.singletonList(new PlayerInfoData(WrappedGameProfile.fromPlayer(getPlayer()));
+
         packet.sendPacket(getPlayer());
     }
 
