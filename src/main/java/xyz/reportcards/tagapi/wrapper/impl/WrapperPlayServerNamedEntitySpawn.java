@@ -24,7 +24,7 @@ import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.Vector;
 
-import com.comphenix.packetwrapper.util.Removed;
+import xyz.reportcards.tagapi.wrapper.Removed;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
@@ -32,8 +32,7 @@ import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import xyz.reportcards.tagapi.wrapper.AbstractPacket;
 
 public class WrapperPlayServerNamedEntitySpawn extends AbstractPacket {
-	public static final PacketType TYPE =
-			PacketType.Play.Server.NAMED_ENTITY_SPAWN;
+	public static final PacketType TYPE = PacketType.Play.Server.NAMED_ENTITY_SPAWN;
 
 	public WrapperPlayServerNamedEntitySpawn() {
 		super(new PacketContainer(TYPE), TYPE);
