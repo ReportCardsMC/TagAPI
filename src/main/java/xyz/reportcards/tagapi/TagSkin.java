@@ -24,7 +24,7 @@ public class TagSkin {
      * @return TagSkin
      */
     public static TagSkin from(OfflinePlayer player) {
-
+        return null;
     }
 
     /**
@@ -34,7 +34,7 @@ public class TagSkin {
      * @return TagSkin
      */
     public static TagSkin from(UUID uuid) {
-
+        return null;
     }
 
     /**
@@ -44,7 +44,7 @@ public class TagSkin {
      * @return TagSkin
      */
     public static TagSkin from(URL url) {
-
+        return null;
     }
 
 
