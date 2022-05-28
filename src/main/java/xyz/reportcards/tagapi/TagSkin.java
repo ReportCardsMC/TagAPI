@@ -1,5 +1,6 @@
 package xyz.reportcards.tagapi;
 
+import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.protocol.player.TextureProperty;
 import com.github.retrooper.packetevents.protocol.player.User;
 import kong.unirest.Unirest;
@@ -68,7 +69,7 @@ public class TagSkin {
 	 * @return TagSkin
 	 */
 	public static CompletableFuture<TagSkin> from(Player player) {
-		User user = TagPlayer.from(player).getPacketUser();
+		User user = PacketEvents.getAPI().getPlayerManager().getUser(player);
 		TagSkin skin = new TagSkin();
 		
 		List<TextureProperty> properties = user.getProfile().getTextureProperties();
