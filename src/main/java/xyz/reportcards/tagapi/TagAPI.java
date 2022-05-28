@@ -10,7 +10,7 @@ import org.bukkit.plugin.Plugin;
 public final class TagAPI {
     
     public static void register(Plugin plugin) {
-        if (PacketEvents.getAPI() == null || isLoaded()) return; // Already registered from another plugin
+        if (PacketEvents.getAPI() != null && isLoaded()) return; // Already registered from another plugin
         PacketEvents.setAPI(SpigotPacketEventsBuilder.build(plugin));
         PacketEvents.getAPI().load();
         PacketEvents.getAPI().init();
