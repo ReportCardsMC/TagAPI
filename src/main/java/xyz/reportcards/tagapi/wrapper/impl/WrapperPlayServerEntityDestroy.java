@@ -22,6 +22,9 @@ import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketContainer;
 import xyz.reportcards.tagapi.wrapper.AbstractPacket;
 
+import java.util.Collections;
+import java.util.List;
+
 public class WrapperPlayServerEntityDestroy extends AbstractPacket {
 	public static final PacketType TYPE = PacketType.Play.Server.ENTITY_DESTROY;
 
@@ -55,14 +58,23 @@ public class WrapperPlayServerEntityDestroy extends AbstractPacket {
 	public int[] getEntityIDs() {
 		return handle.getIntegerArrays().read(0);
 	}
-
+	
 	/**
 	 * Set Entity IDs.
 	 *
 	 * @param value - new value.
 	 */
-	public void setEntityIds(int[] value) {
-		handle.getIntegerArrays().write(0, value);
+	public void setEntityIds(List<Integer> value) {
+		handle.getIntLists().write(0, value);
 	}
-
+	
+	/**
+	 * Set Entity IDs.
+	 *
+	 * @param value - new value.
+	 */
+	public void setEntityId(Integer value) {
+		setEntityIds(Collections.singletonList(value));
+	}
+	
 }

@@ -17,6 +17,7 @@
     </properties>
 
     <build>
+        <finalName>TagAPI</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -89,8 +90,13 @@
         <dependency>
             <groupId>com.comphenix.protocol</groupId>
             <artifactId>ProtocolLib</artifactId>
-            <version>4.7.0</version>
+            <version>4.8.0</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.konghq</groupId>
+            <artifactId>unirest-java</artifactId>
+            <version>3.13.8</version>
         </dependency>
     </dependencies>
 </project>

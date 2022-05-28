@@ -20,8 +20,10 @@ package xyz.reportcards.tagapi.wrapper.impl;
 
 import java.util.UUID;
 
+import com.comphenix.protocol.ProtocolLibrary;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
 import xyz.reportcards.tagapi.wrapper.Removed;
@@ -204,4 +206,14 @@ public class WrapperPlayServerNamedEntitySpawn extends AbstractPacket {
 	public void setMetadata(WrappedDataWatcher value) {
 		handle.getDataWatcherModifier().write(0, value);
 	}
+	
+	public void setPlayer(Player player) {
+		setPlayerUUID(player.getUniqueId());
+		setEntityID(player.getEntityId());
+		setPosition(player.getLocation().toVector());
+		setYaw(player.getLocation().getYaw());
+		setPitch(player.getLocation().getPitch());
+//		setMetadata(WrappedDataWatcher.getEntityWatcher(player));
+	}
+	
 }

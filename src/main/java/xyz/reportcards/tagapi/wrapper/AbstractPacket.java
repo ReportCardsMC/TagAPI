@@ -18,7 +18,9 @@ package xyz.reportcards.tagapi.wrapper;
  */
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import com.comphenix.protocol.PacketType;
@@ -32,8 +34,9 @@ public abstract class AbstractPacket {
 
 	/**
 	 * Constructs a new strongly typed wrapper for the given packet.
+	 * 
 	 * @param handle - handle to the raw packet data.
-	 * @param type - the packet type.
+	 * @param type   - the packet type.
 	 */
 	protected AbstractPacket(PacketContainer handle, PacketType type) {
 		// Make sure we're given a valid packet
@@ -42,20 +45,22 @@ public abstract class AbstractPacket {
 		if (!Objects.equal(handle.getType(), type))
 			throw new IllegalArgumentException(
 					handle.getHandle() + " is not a packet of type " + type);
-		
+
 		this.handle = handle;
 	}
 
 	/**
 	 * Retrieve a handle to the raw packet data.
+	 * 
 	 * @return Raw packet data.
 	 */
 	public PacketContainer getHandle() {
 		return handle;
 	}
-	
+
 	/**
 	 * Send the current packet to the given receiver.
+	 * 
 	 * @param receiver - the receiver.
 	 * @throws RuntimeException If the packet cannot be sent.
 	 */
@@ -66,9 +71,23 @@ public abstract class AbstractPacket {
 			throw new RuntimeException("Cannot send packet.", e);
 		}
 	}
+
+	/**
+	 * Send the current packet to all online players.
+	 */
+	public void broadcast() {
+		for (Player p : Bukkit.getOnlinePlayers())
+			sendPacket(p);
+	}
+	
+	public void broadcast(List<Player> exclude) {
+		for (Player p : Bukkit.getOnlinePlayers())
+			if (!exclude.contains(p)) sendPacket(p);
+	}
 	
 	/**
 	 * Simulate receiving the current packet from the given sender.
+	 * 
 	 * @param sender - the sender.
 	 * @throws RuntimeException If the packet cannot be received.
 	 */
