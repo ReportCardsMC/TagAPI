@@ -14,6 +14,7 @@ public final class TagAPI {
         PacketEvents.setAPI(SpigotPacketEventsBuilder.build(plugin));
         PacketEvents.getAPI().load();
         PacketEvents.getAPI().init();
+        Bukkit.getLogger().info("[TagAPI] PacketEvents has been registered.");
     }
     
     public static boolean isLoaded() { return PacketEvents.getAPI().isLoaded(); }
