@@ -1,14 +1,26 @@
 package xyz.reportcards.tagapi;
 
+import com.github.retrooper.packetevents.PacketEvents;
+import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
 public final class TagAPI {
     
+    public static void register(Plugin plugin) {
+        if (isLoaded()) return; // Already registered from another plugin
+        PacketEvents.setAPI(SpigotPacketEventsBuilder.build(plugin));
+        PacketEvents.getAPI().load();
+        PacketEvents.getAPI().init();
+    }
+    
+    public static boolean isLoaded() { return PacketEvents.getAPI().isLoaded(); }
+    
     public static void setSkin(Player player, String username) {
         TagPlayer data = TagPlayer.from(player);
-        if (Bukkit.getPlayer(username) != null) data.setSkin(TagSkin.from(Bukkit.getPlayer(username)));
+        if (Bukkit.getPlayer(username) != null) TagSkin.from(Bukkit.getPlayer(username)).thenAccept(data::setSkin);
         else TagSkin.from(username).thenAccept(data::setSkin);
     }
     

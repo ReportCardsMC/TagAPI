@@ -1,17 +1,21 @@
 package xyz.reportcards.tagapi;
 
-import com.comphenix.protocol.wrappers.EnumWrappers;
-import com.comphenix.protocol.wrappers.PlayerInfoData;
-import com.comphenix.protocol.wrappers.WrappedChatComponent;
-import com.comphenix.protocol.wrappers.WrappedGameProfile;
+import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.protocol.player.GameMode;
+import com.github.retrooper.packetevents.protocol.player.User;
+import com.github.retrooper.packetevents.protocol.player.UserProfile;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDestroyEntities;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerPlayerInfo;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSpawnPlayer;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import xyz.reportcards.tagapi.wrapper.impl.WrapperPlayServerEntityDestroy;
-import xyz.reportcards.tagapi.wrapper.impl.WrapperPlayServerNamedEntitySpawn;
-import xyz.reportcards.tagapi.wrapper.impl.WrapperPlayServerPlayerInfo;
+import xyz.reportcards.tagapi.utils.PacketUtils;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.UUID;
 
+@SuppressWarnings("unused")
 public class TagPlayer {
 
 	private final UUID player;
@@ -21,7 +25,7 @@ public class TagPlayer {
 	public TagPlayer(Player player) {
 		this.player = player.getUniqueId();
 		this.nametag = player.getName();
-		this.skin = TagSkin.from(player);
+		this.skin = TagSkin.from(player).getNow(null);
 	}
 
 	public TagPlayer(UUID uuid) throws IllegalArgumentException {
@@ -30,7 +34,7 @@ public class TagPlayer {
 
 		this.player = uuid;
 		this.nametag = getPlayer().getName();
-		this.skin = TagSkin.from(Bukkit.getPlayer(player));
+		this.skin = TagSkin.from(Bukkit.getPlayer(player)).getNow(null);
 	}
 
 	public void setSkin(TagSkin skin) {
@@ -48,56 +52,72 @@ public class TagPlayer {
 	}
 
 	public String getNameTag() {
-		return nametag;
+		return this.nametag;
 	}
 
 	public TagSkin getCurrentSkin() {
-		return skin;
+		return this.skin;
 	}
 	
 	public TagSkin getActualSkin() {
-		return TagSkin.from(getPlayer());
+		return TagSkin.from(getPlayer()).getNow(null);
+	}
+	
+	public User getPacketUser() {
+		return PacketEvents.getAPI().getPlayerManager().getUser(player);
+	}
+	
+	public int getPing() {
+		return PacketEvents.getAPI().getPlayerManager().getPing(player);
 	}
 
-	private List<PlayerInfoData> getPlayerInfoData() {
-		return getPlayerInfoData(WrappedGameProfile.fromPlayer(getPlayer()));
+	private WrapperPlayServerPlayerInfo.PlayerData getPlayerData() {
+		return getPlayerData(getPacketUser().getProfile());
 	}
-
-	private List<PlayerInfoData> getPlayerInfoData(WrappedGameProfile profile) {
-		return Collections.singletonList(new PlayerInfoData(
-				profile,
-				0,
-				EnumWrappers.NativeGameMode.fromBukkit(getPlayer().getGameMode()),
-				WrappedChatComponent.fromText(getNameTag())));
+	
+	private WrapperPlayServerPlayerInfo.PlayerData getPlayerData(UserProfile profile) {
+		return new WrapperPlayServerPlayerInfo.PlayerData(
+			Component.text(this.getNameTag()),
+			profile,
+			GameMode.valueOf(getPlayer().getGameMode().name().toUpperCase()),
+			getPing()
+		);
 	}
 
 	public void update() {
-		WrapperPlayServerPlayerInfo disconnect = new WrapperPlayServerPlayerInfo();
-		disconnect.setAction(EnumWrappers.PlayerInfoAction.REMOVE_PLAYER);
-		disconnect.setData(getPlayerInfoData());
-		disconnect.broadcast();
+		PacketUtils.broadcast(new WrapperPlayServerPlayerInfo(
+			WrapperPlayServerPlayerInfo.Action.REMOVE_PLAYER,
+			getPlayerData()
+		));
 		
-		 WrapperPlayServerPlayerInfo reconnect = new WrapperPlayServerPlayerInfo();
-		 reconnect.setAction(EnumWrappers.PlayerInfoAction.ADD_PLAYER);
+		WrapperPlayServerPlayerInfo reconnect = new WrapperPlayServerPlayerInfo(
+			WrapperPlayServerPlayerInfo.Action.ADD_PLAYER
+		);
 		
-		 WrappedGameProfile profile = WrappedGameProfile.fromPlayer(getPlayer());
-		 profile.getProperties().removeAll("textures");
-		 profile.getProperties().put("textures", skin.toProperty());
+		UserProfile profile = getPacketUser().getProfile();
+		profile.getTextureProperties().clear();
+		profile.getTextureProperties().add(skin.toProperty());
 		
-		 reconnect.setData(getPlayerInfoData(profile));
-		 reconnect.broadcast();
+		reconnect.setPlayerDataList(Collections.singletonList(getPlayerData(profile)));
+		PacketUtils.broadcast(reconnect);
 		
-		 refresh();
+		refresh();
 	}
 
 	public void refresh() {
-		WrapperPlayServerEntityDestroy destroy = new WrapperPlayServerEntityDestroy();
-		destroy.setEntityId(getPlayer().getEntityId());
-		destroy.broadcast(Collections.singletonList(getPlayer()));
-
-		WrapperPlayServerNamedEntitySpawn spawn = new WrapperPlayServerNamedEntitySpawn();
-		spawn.setPlayer(getPlayer());
-		spawn.broadcast(Collections.singletonList(getPlayer()));
+		PacketUtils.broadcast(
+			new WrapperPlayServerDestroyEntities(getPlayer().getEntityId()),
+			Collections.singletonList(getPlayer())
+		);
+		
+		PacketUtils.broadcast(
+			new WrapperPlayServerSpawnPlayer(
+				getPlayer().getEntityId(),
+				getPlayer().getUniqueId(),
+				PacketUtils.getPacketLocation(getPlayer().getLocation())
+			),
+			Collections.singletonList(getPlayer())
+		);
 	}
 
 	public static TagPlayer from(Player player) {

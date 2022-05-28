@@ -1,17 +1,15 @@
 package xyz.reportcards.tagapi;
 
-import com.comphenix.protocol.wrappers.WrappedGameProfile;
-import kong.unirest.HttpResponse;
+import com.github.retrooper.packetevents.protocol.player.TextureProperty;
+import com.github.retrooper.packetevents.protocol.player.User;
 import kong.unirest.Unirest;
-import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-
-import com.comphenix.protocol.wrappers.WrappedSignedProperty;
 import org.bukkit.entity.Player;
 import xyz.reportcards.tagapi.model.unified.AccountModel;
+
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public class TagSkin {
 	
@@ -41,7 +39,7 @@ public class TagSkin {
 				.asObjectAsync(AccountModel.class)
 				.thenAccept(response -> {
 					AccountModel data = response.getBody();
-					if (data.code != 200) result.completeExceptionally(new RuntimeException("Failed to fetch skin data: "+data.reason));
+					if (!response.isSuccess()) result.completeExceptionally(new RuntimeException("Failed to fetch skin data: "+data.reason));
 					skin.texture = data.textures.raw.value;
 					skin.signature = data.textures.raw.signature;
 					
@@ -58,12 +56,8 @@ public class TagSkin {
 	 * @return TagSkin
 	 */
 	public static CompletableFuture<TagSkin> from(OfflinePlayer player) {
-		CompletableFuture<TagSkin> result = new CompletableFuture<>();
-		
-		if (player.isOnline()) result.complete(from(player.getPlayer()));
+		if (player.isOnline()) return from(player.getPlayer());
 		else return from(player.getUniqueId());
-		
-		return result;
 	}
 	
 	/**
@@ -73,17 +67,19 @@ public class TagSkin {
 	 * @param player The player wearing the skin
 	 * @return TagSkin
 	 */
-	public static TagSkin from(Player player) {
-		WrappedGameProfile profile = WrappedGameProfile.fromPlayer(player);
+	public static CompletableFuture<TagSkin> from(Player player) {
+		User user = TagPlayer.from(player).getPacketUser();
 		TagSkin skin = new TagSkin();
 		
-		if (!profile.getProperties().containsKey("textures")) return null;
-		WrappedSignedProperty property = profile.getProperties().get("textures").iterator().next();
+		List<TextureProperty> properties = user.getProfile().getTextureProperties();
+		TextureProperty property = properties.size() > 0 ? properties.get(0) : null;
+		
+		if (property == null) return TagSkin.from(player.getName());
 		
 		skin.texture = property.getValue();
-		skin.texture = property.getSignature();
+		skin.signature = property.getSignature();
 		
-		return skin;
+		return CompletableFuture.completedFuture(skin);
 	}
 
 	/**
@@ -102,7 +98,7 @@ public class TagSkin {
 			.asObjectAsync(AccountModel.class)
 			.thenAccept(response -> {
 				AccountModel data = response.getBody();
-				if (data.code != 200) result.completeExceptionally(new RuntimeException("Failed to fetch skin data: "+data.reason));
+				if (!response.isSuccess()) result.completeExceptionally(new RuntimeException("Failed to fetch skin data: "+data.reason));
 				skin.texture = data.textures.raw.value;
 				skin.signature = data.textures.raw.signature;
 				
@@ -127,7 +123,7 @@ public class TagSkin {
 	public String texture;
 	public String signature;
 
-	public WrappedSignedProperty toProperty() {
-		return new WrappedSignedProperty("textures", texture, signature);
+	public TextureProperty toProperty() {
+		return new TextureProperty("textures", texture, signature);
 	}
 }
