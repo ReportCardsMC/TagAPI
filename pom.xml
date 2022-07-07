@@ -43,20 +43,8 @@
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                             <relocations>
                                 <relocation>
-                                    <pattern>com.github.retrooper</pattern>
-                                    <shadedPattern>xyz.reportcards.tagapi.packetevents</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>io.github.retrooper</pattern>
-                                    <shadedPattern>xyz.reportcards.tagapi.packetevents</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>net.kyori</pattern>
-                                    <shadedPattern>xyz.reportcards.tagapi.packetevents.libs.net.kyori</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>com.google.gson</pattern>
-                                    <shadedPattern>xyz.reportcards.tagapi.packetevents.libs.com.google.gson</shadedPattern>
+                                    <pattern>io.github.retrooper.packetevents</pattern>
+                                    <shadedPattern>io.github.retrooper.tagapi.packetevents</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>
